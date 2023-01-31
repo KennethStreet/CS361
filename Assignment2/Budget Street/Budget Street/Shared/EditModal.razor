@@ -1,0 +1,54 @@
+﻿@inject NotificationService NotificationService
+
+<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Category</RadzenText>
+<RadzenDropDown AllowClear="true" TValue="string" Class="w-100"
+                Data=@(PersonsCategories.Select(c => c.CategoryName).Distinct())
+                Change=@(args => OnChange(args, "DropDown")) 
+                @bind-Value="DropdownValue"/>
+
+<div class="mt-3">
+    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Transaction</RadzenText>
+    <RadzenTextBox Change=@(args => OnChange(args, "TextBox")) Class="w-100" @bind-Value="TransactionValue"/>
+</div>
+
+<div class="mt-3">
+    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Amount</RadzenText>
+    <RadzenNumeric TValue="double" Format="c" @bind-Value=@CurrencyValue Placeholder="Enter or clear value" Change="@(args => OnChange(args, "Formatted numeric"))" />
+</div>
+
+
+<br />
+<br />
+<br />
+<button class="btn btn-outline-primary">Cancel</button>
+<button class="btn btn-primary" @onclick="@(args => ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Summary", Detail = "Success Detail", Duration = 4000 }))">Save</button>
+
+@code {
+    [Parameter]
+    public Categories PersonsCategories { get; set; }
+
+    [Parameter]
+    public string DropdownValue { get; set; }
+
+    [Parameter]
+    public string TransactionValue { get; set; }
+
+    [Parameter]
+    public double CurrencyValue { get; set; } = 0.0;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Console.WriteLine($"Category Count: {PersonsCategories.Count}");
+    }
+
+    public void OnChange(object args, string tag)
+    {
+    }
+
+    public async Task ShowNotification(NotificationMessage message)
+    {
+        NotificationService.Notify(message);
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+}

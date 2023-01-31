@@ -1,0 +1,37 @@
+﻿<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Category</RadzenText>
+<RadzenDropDown AllowClear="true" TValue="string" Class="w-100"
+                Data=@(PersonsCategories.Select(c => c.CategoryName).Distinct())
+                Change=@(args => OnChange(args, "DropDown")) />
+
+<div class="mt-3">
+    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Transaction</RadzenText>
+    <RadzenTextBox Change=@(args => OnChange(args, "TextBox")) Class="w-100" />
+</div>
+
+<div class="mt-3">
+    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Amount</RadzenText>
+    <RadzenNumeric TValue="double" Format="c" @bind-Value=@dblValue Placeholder="Enter or clear value" Change="@(args => OnChange(args, "Formatted numeric"))" />
+</div>
+
+
+<br/><br/><br/>
+<button class="btn btn-outline-primary">Cancel</button>
+<button class="btn btn-primary">Save</button>
+
+@code {
+    [Parameter]
+    public Categories PersonsCategories { get; set; }
+
+    private double dblValue = 0.0;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Console.WriteLine($"Category Count: {PersonsCategories.Count}");
+    }
+
+    public void OnChange(object args, string tag)
+    {
+    }
+}

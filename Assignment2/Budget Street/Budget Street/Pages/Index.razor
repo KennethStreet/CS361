@@ -1,0 +1,259 @@
+﻿@page "/"
+@inject DialogService DialogService
+
+
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+</style>
+
+
+<RadzenPanel AllowCollapse="true" Collapsed="true">
+    <HeaderTemplate>
+        New Features
+    </HeaderTemplate>
+    <ChildContent>
+        <div class="mt-3">
+            Connecting your bank account allows transactions to be imported for auto tracking.
+        </div>
+        <div>
+            Top screen new transaction button added for tracking expenses more quickly.
+        </div>
+        <div>
+            Both new feature are free to all users.
+        </div>
+        <div class="mt-3"><a href="#">Walk Through Video</a></div>
+    </ChildContent>
+</RadzenPanel>
+
+<div class="mt-3 mb-2">
+    <RadzenDropDown Data="PersonsBudgets.Select(b => b.DisplayBudget)"
+                    TValue="Budget"
+                    Value="@PersonsBudgets.FirstOrDefault().DisplayBudget">
+    </RadzenDropDown>
+
+
+
+    <a class="float-right" href="#">Connect My Bank</a>
+</div>
+
+<div class="mt-5 mb-3">
+    <div>Monthly Budget: </div>
+    <RadzenNumeric TValue="double" Format="c" @bind-Value=@CurrencyValue Placeholder="Enter or clear value" Change="@(args => OnChange(args, "Formatted numeric"))" />
+</div>
+
+<div style="float: left;">
+    <h4 class="mt-3 float-left">Housing</h4>
+</div>
+<div class="mt-3" style="float: right;">
+    <i class="fa-solid fa-circle-plus fa-2xl" title="Add New Budget Item" style="color:green;" @onclick="AddExpense"></i>
+</div>
+
+<table class="mb-3">
+    <tr>
+        <th>Transaction</th>
+        <th>Cost</th>
+        <th>Actions</th>
+    </tr>
+    <tr>
+        <td>Rent</td>
+        <td>$1000</td>
+        <td>
+            <RadzenButton Text="Edit" Click=@(args => AddExpense()) />
+            <RadzenButton Text="Delete" Click=@(args => DialogService.Confirm("Delete Transaction?", "Delete", new ConfirmOptions() { OkButtonText = "Delete", CancelButtonText = "Cancel" })) />
+        </td>
+    </tr>
+
+    <tr hidden="@IsHousing">
+        <td>Electricity</td>
+        <td>$100</td>
+        <td>
+            <RadzenButton Text="Edit" Click=@(args => EditExpense()) />
+            <RadzenButton Text="Delete" Click=@(args => DialogService.Confirm("Delete Transaction?", "Delete", new ConfirmOptions() { OkButtonText = "Delete", CancelButtonText = "Cancel" })) />
+        </td>
+    </tr>
+
+    <tr hidden="@(!IsHousing)">
+        <td>Electricity</td>
+        <td>$80</td>
+        <td>
+            <RadzenButton Text="Edit" Click=@(args => EditExpense()) />
+            <RadzenButton Text="Delete" Click=@(args => DialogService.Confirm("Delete Transaction?", "Delete", new ConfirmOptions() { OkButtonText = "Delete", CancelButtonText = "Cancel" })) />
+        </td>
+    </tr>
+</table>
+
+
+
+<div style="float: left;">
+    <h4 class="mt-3 float-left">Debt</h4>
+</div>
+<div class="mt-3" style="float: right;">
+    <i class="fa-solid fa-circle-plus fa-2xl" title="Add New Budget Item" style="color:green;" @onclick="AddExpense"></i>
+</div>
+
+<table>
+    <tr>
+        <th>Transaction</th>
+        <th>Cost</th>
+        <th>Actions</th>
+    </tr>
+    <tr>
+        <td>Credit Card</td>
+        <td>$200</td>
+        <td>
+            <RadzenButton Text="Edit" Click=@(args => EditExpense()) />
+            <RadzenButton Text="Delete" Click=@(args => DialogService.Confirm("Delete Transaction?", "Delete", new ConfirmOptions() { OkButtonText = "Delete", CancelButtonText = "Cancel" })) />
+        </td>
+    </tr>
+    <tr hidden="@IsDebt">
+        <td>Car Payment</td>
+        <td>$100</td>
+        <td>
+            <RadzenButton Text="Edit" Click=@(args => EditExpense()) />
+            <RadzenButton Text="Delete" Click=@(args => DeleteTransaction()) />
+        </td>
+    </tr>
+</table>
+
+
+@code{
+
+    private Budgets PersonsBudgets { get; set; } = new Budgets();
+    private Categories PersonsCategories { get; set; } = new Categories();
+
+    private double CurrencyValue { get; set; } = 2000.00;
+
+    private bool IsHousing { get; set; }
+    private bool IsDebt { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        InitializeBudget();
+        InitializeCategories();
+
+        DialogService.OnOpen += Open;
+        DialogService.OnClose += Close;
+    }
+
+    private void InitializeBudget()
+    {
+        var budget1 = new Budget()
+        {
+            BudgetId = 1,
+            Year = 2023,
+            Month = 1,
+            BudgetedIncome = 5000,
+            Categories = new List<Category>()
+        };
+
+        var budget2 = new Budget()
+        {
+            BudgetId = 2,
+            Year = 2023,
+            Month = 2,
+            BudgetedIncome = 5000,
+            Categories = new List<Category>()
+        };
+
+        var budget3 = new Budget()
+        {
+            BudgetId = 3,
+            Year = 2023,
+            Month = 3,
+            BudgetedIncome = 5000,
+            Categories = new List<Category>()
+        };
+
+        PersonsBudgets.Add(budget1);
+        PersonsBudgets.Add(budget2);
+        PersonsBudgets.Add(budget3);
+    }
+
+    private void InitializeCategories()
+    {
+        var category1 = new Category()
+        {
+            CategoryId = 1,
+            CategoryName = "Housing",
+            CategoryItems = new List<CategoryItem>()
+        };
+
+        var category2 = new Category()
+        {
+            CategoryId = 2,
+            CategoryName = "Transportation",
+            CategoryItems = new List<CategoryItem>()
+        };
+
+        var category3 = new Category()
+        {
+            CategoryId = 3,
+            CategoryName = "Debt",
+            CategoryItems = new List<CategoryItem>()
+        };
+
+        PersonsCategories.Add(category1);
+        PersonsCategories.Add(category2);
+        PersonsCategories.Add(category3);
+    }
+
+    public async Task DeleteTransaction()
+    {
+        await DialogService.Confirm("Delete Transaction?", "Delete", new ConfirmOptions() { OkButtonText = "Delete", CancelButtonText = "Cancel" });
+        IsDebt = !IsDebt;
+    }
+
+    public async Task AddExpense()
+    {
+        await DialogService.OpenAsync<ExpenseModal>("Add Expense",
+            new Dictionary<string, object>() { { "PersonsCategories", PersonsCategories } },
+            new DialogOptions() { Width = "700px", Height = "512px", Resizable = true, Draggable = true });
+    }
+
+    public async Task EditExpense()
+    {
+        await DialogService.OpenAsync<EditModal>("Edit Expense",
+            new Dictionary<string, object>() { { "PersonsCategories", PersonsCategories }, { "DropdownValue", "Housing" }, { "TransactionValue", "Electricity"}, { "CurrencyValue", 100.00} },
+            new DialogOptions() { Width = "700px", Height = "512px", Resizable = true, Draggable = true });
+        IsHousing = !IsHousing;
+    }
+
+    public void OnChange(object args, string tag)
+    {
+    }
+
+    private class CategoryItemTransactions
+    {
+        public int TransactionId { get; set; }
+        public int CategoryItemId { get; set; }
+    }
+
+    void Open(string title, Type type, Dictionary<string, object> parameters, DialogOptions options)
+    {
+        Console.WriteLine("Dialog open");
+    }
+
+    void Close(dynamic result)
+    {
+        Console.WriteLine("Dialog closed");
+    }
+
+    public void Dispose()
+    {
+        // The DialogService is a singleton so it is advisable to unsubscribe.
+        DialogService.OnOpen -= Open;
+        DialogService.OnClose -= Close;
+    }
+}
